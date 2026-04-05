@@ -3,444 +3,473 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vibe Check</title>
+    <title>Vibe Check — Curated Experiences</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --background: 0 0% 100%;
-            --foreground: 240 10% 3.9%;
-            --card: 0 0% 100%;
-            --card-foreground: 240 10% 3.9%;
-            --popover: 0 0% 100%;
-            --popover-foreground: 240 10% 3.9%;
-            --primary: 240 5.9% 10%;
-            --primary-foreground: 0 0% 98%;
-            --secondary: 240 4.8% 95.9%;
-            --secondary-foreground: 240 5.9% 10%;
-            --muted: 240 4.8% 95.9%;
-            --muted-foreground: 240 3.8% 46.1%;
-            --accent: 240 4.8% 95.9%;
-            --accent-foreground: 240 5.9% 10%;
-            --destructive: 0 84.2% 60.2%;
-            --destructive-foreground: 0 0% 98%;
-            --border: 240 5.9% 90%;
-            --input: 240 5.9% 90%;
-            --ring: 240 5.9% 10%;
-            --radius: 0px;
+            --bg: #09090b;
+            --fg: #fafafa;
+            --card-bg: rgba(24, 24, 27, 0.6);
+            --border: rgba(255, 255, 255, 0.1);
+            --primary: #fafafa;
+            --muted: #a1a1aa;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: hsl(var(--background));
-            color: hsl(var(--foreground));
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--fg);
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 2rem 1rem;
-            line-height: 1.5;
-            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+            position: relative;
         }
 
-        .container {
+        /* Interactive Background */
+        #canvas-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            max-width: 42rem;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.6;
+        }
+
+        .app-container {
+            max-width: 480px;
             margin: 0 auto;
+            padding: 4rem 1.5rem;
+            position: relative;
+            z-index: 1;
         }
 
         .header {
-            text-align: center;
             margin-bottom: 3rem;
+            text-align: center;
         }
 
         .header h1 {
             font-size: 2.5rem;
             font-weight: 700;
-            letter-spacing: -0.025em;
+            letter-spacing: -0.04em;
             margin-bottom: 0.5rem;
-        }
-
-        .header p {
-            color: hsl(var(--muted-foreground));
-            font-size: 1.125rem;
+            background: linear-gradient(to bottom right, #fff, #a1a1aa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .mood-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            grid-template-columns: repeat(3, 1fr);
             gap: 0.75rem;
-            margin-bottom: 2rem;
+            margin-bottom: 2.5rem;
         }
 
         .mood-btn {
-            background: hsl(var(--background));
-            border: 1px solid hsl(var(--border));
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            color: var(--muted);
             padding: 1rem;
             font-size: 0.875rem;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.15s ease;
-            text-align: center;
+            backdrop-filter: blur(12px);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .mood-btn:hover {
-            background: hsl(var(--accent));
-            color: hsl(var(--accent-foreground));
+            border-color: rgba(255,255,255,0.2);
+            color: var(--fg);
         }
 
         .mood-btn.active {
-            background: hsl(var(--primary));
-            color: hsl(var(--primary-foreground));
-            border-color: hsl(var(--primary));
+            background: var(--fg);
+            color: var(--bg);
+            border-color: var(--fg);
+        }
+
+        .vibe-stage {
+            min-height: 400px;
+            position: relative;
         }
 
         .vibe-card {
-            border: 1px solid hsl(var(--border));
-            background: hsl(var(--card));
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(16px);
             padding: 1.5rem;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
+            border-radius: 0;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
             display: none;
         }
 
-        .vibe-card.visible {
+        .vibe-card.show {
             display: block;
-            animation: fadeIn 0.3s ease-out;
+            opacity: 1;
+            transform: translateY(0);
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(4px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .vibe-section {
-            margin-bottom: 1.5rem;
-            padding-bottom: 1.5rem;
-            border-bottom: 1px solid hsl(var(--border));
-        }
-
-        .vibe-section:last-child {
-            margin-bottom: 0;
-            padding-bottom: 0;
-            border-bottom: none;
-        }
-
-        .vibe-label {
-            font-size: 0.75rem;
-            font-weight: 600;
+        .section-label {
+            font-size: 0.7rem;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: hsl(var(--muted-foreground));
-            margin-bottom: 0.5rem;
+            letter-spacing: 0.1em;
+            color: var(--muted);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
-        .vibe-content {
-            font-size: 1rem;
+        .section-label::before {
+            content: '';
+            display: block;
+            width: 4px;
+            height: 4px;
+            background: currentColor;
+        }
+
+        .section-content {
+            font-size: 1.125rem;
+            line-height: 1.5;
             font-weight: 500;
         }
 
-        .vibe-image {
-            width: 100%;
-            height: auto;
-            display: block;
-            margin-top: 0.75rem;
-            border: 1px solid hsl(var(--border));
-        }
-
-        .color-palette {
+        .color-row {
             display: flex;
             gap: 0.5rem;
-            margin-top: 0.75rem;
+            margin-top: 1rem;
         }
 
-        .color-swatch {
-            width: 40px;
-            height: 40px;
-            border: 1px solid hsl(var(--border));
+        .swatch {
+            width: 32px;
+            height: 32px;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: transform 0.2s;
         }
 
-        .actions {
+        .swatch:hover { transform: scale(1.1); }
+
+        .action-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 1.5rem;
+            background: linear-gradient(to top, var(--bg) 80%, transparent);
             display: flex;
-            gap: 0.75rem;
-            margin-top: 2rem;
+            gap: 1rem;
+            justify-content: center;
+            z-index: 10;
         }
 
         .btn {
-            flex: 1;
-            background: hsl(var(--primary));
-            color: hsl(var(--primary-foreground));
-            border: 1px solid hsl(var(--primary));
-            padding: 0.75rem 1rem;
-            font-size: 0.875rem;
-            font-weight: 500;
+            background: var(--fg);
+            color: var(--bg);
+            border: none;
+            padding: 0.875rem 2rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: opacity 0.15s ease;
-            text-align: center;
+            transition: transform 0.1s;
         }
 
-        .btn:hover {
-            opacity: 0.9;
+        .btn:active { transform: scale(0.96); }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--fg);
         }
 
-        .btn-secondary {
-            background: hsl(var(--background));
-            color: hsl(var(--foreground));
-            border: 1px solid hsl(var(--border));
+        .loading-dots {
+            display: inline-flex;
+            gap: 4px;
         }
-
-        .btn-secondary:hover {
-            background: hsl(var(--accent));
-            color: hsl(var(--accent-foreground));
+        .dot {
+            width: 6px;
+            height: 6px;
+            background: var(--muted);
+            animation: bounce 1.4s infinite ease-in-out both;
         }
-
-        .loading {
-            text-align: center;
-            padding: 3rem;
-            color: hsl(var(--muted-foreground));
-            font-size: 0.875rem;
-        }
-
-        .error {
-            background: hsl(0 93% 94%);
-            color: hsl(0 74% 42%);
-            border: 1px solid hsl(0 93% 90%);
-            padding: 1rem;
-            margin-bottom: 1.5rem;
-            font-size: 0.875rem;
-            display: none;
+        .dot:nth-child(1) { animation-delay: -0.32s; }
+        .dot:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <canvas id="canvas-bg"></canvas>
+
+    <div class="app-container">
         <div class="header">
             <h1>Vibe Check</h1>
-            <p>Select a mood to curate your experience</p>
+            <p style="color: var(--muted)">Sync your mood with the digital atmosphere</p>
         </div>
-        
-        <div class="error" id="error"></div>
-        
-        <div class="mood-grid" id="moodSelector">
-            <button class="mood-btn" data-mood="happy">Happy</button>
-            <button class="mood-btn" data-mood="chill">Chill</button>
-            <button class="mood-btn" data-mood="energetic">Energetic</button>
-            <button class="mood-btn" data-mood="melancholy">Melancholy</button>
-            <button class="mood-btn" data-mood="creative">Creative</button>
+
+        <div class="mood-grid">
+            <button class="mood-btn" data-mood="happy" data-color="#eab308">Happy</button>
+            <button class="mood-btn" data-mood="chill" data-color="#22c55e">Chill</button>
+            <button class="mood-btn" data-mood="energetic" data-color="#ef4444">Energetic</button>
+            <button class="mood-btn" data-mood="melancholy" data-color="#3b82f6">Melancholy</button>
+            <button class="mood-btn" data-mood="creative" data-color="#a855f7">Creative</button>
         </div>
-        
-        <div class="vibe-card" id="vibeCard">
-            <div class="loading" id="loading">Curating vibe...</div>
-            
-            <div class="vibe-section" id="activitySection" style="display:none;">
-                <div class="vibe-label">Activity</div>
-                <div class="vibe-content" id="activityText"></div>
-            </div>
-            
-            <div class="vibe-section" id="musicSection" style="display:none;">
-                <div class="vibe-label">Music</div>
-                <div class="vibe-content" id="musicText"></div>
-            </div>
-            
-            <div class="vibe-section" id="quoteSection" style="display:none;">
-                <div class="vibe-label">Quote</div>
-                <div class="vibe-content" id="quoteText"></div>
-            </div>
-            
-            <div class="vibe-section" id="imageSection" style="display:none;">
-                <div class="vibe-label">Visual</div>
-                <img class="vibe-image" id="vibeImage" alt="Mood visual" />
-            </div>
-            
-            <div class="vibe-section" id="colorSection" style="display:none;">
-                <div class="vibe-label">Palette</div>
-                <div class="color-palette" id="colorPalette"></div>
-            </div>
-        </div>
-        
-        <div class="actions">
-            <button class="btn" onclick="generateVibe()">Regenerate</button>
-            <button class="btn btn-secondary" onclick="shareVibe()">Share Link</button>
+
+        <div class="vibe-stage" id="vibeStage">
+            <!-- Content injected via JS -->
         </div>
     </div>
 
-    <script>
-        let currentVibe = null;
-        let currentMood = null;
+    <div class="action-bar">
+        <button class="btn" onclick="app.regenerate()">Re-roll Vibe</button>
+        <button class="btn btn-outline" onclick="app.share()">Share</button>
+    </div>
 
-        const moodData = {
-            happy: {
-                activities: ['Go for a walk', 'Call a friend', 'Try a new recipe', 'Watch a comedy'],
-                music: ['Upbeat Pop', 'Indie Folk', 'Dance Hits', 'Sunny Acoustic'],
-                colors: ['#FCD34D', '#F87171', '#34D399', '#FBBF24', '#F472B6'],
-                images: ['https://cataas.com/cat?type=square', 'https://place.dog/400/300']
+    <script>
+        /**
+         * Particle System for Dynamic Background
+         */
+        class ParticleSystem {
+            constructor() {
+                this.canvas = document.getElementById('canvas-bg');
+                this.ctx = this.canvas.getContext('2d');
+                this.particles = [];
+                this.config = { count: 60, speed: 0.5, color: '#ffffff' };
+                this.resize();
+                window.addEventListener('resize', () => this.resize());
+                this.initParticles();
+                this.animate();
+            }
+
+            resize() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+            }
+
+            initParticles() {
+                this.particles = [];
+                for (let i = 0; i < this.config.count; i++) {
+                    this.particles.push({
+                        x: Math.random() * this.canvas.width,
+                        y: Math.random() * this.canvas.height,
+                        vx: (Math.random() - 0.5) * this.config.speed,
+                        vy: (Math.random() - 0.5) * this.config.speed,
+                        size: Math.random() * 2 + 1
+                    });
+                }
+            }
+
+            setMood(mood) {
+                const moods = {
+                    happy: { count: 80, speed: 1.2, color: '#facc15' },
+                    chill: { count: 40, speed: 0.3, color: '#4ade80' },
+                    energetic: { count: 120, speed: 2.5, color: '#f87171' },
+                    melancholy: { count: 50, speed: 0.4, color: '#60a5fa' },
+                    creative: { count: 70, speed: 1.0, color: '#c084fc' }
+                };
+                this.config = moods[mood] || moods.chill;
+                this.initParticles();
+            }
+
+            animate() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                this.ctx.fillStyle = this.config.color;
+                this.ctx.strokeStyle = this.config.color;
+
+                this.particles.forEach((p, i) => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+
+                    if (p.x < 0 || p.x > this.canvas.width) p.vx *= -1;
+                    if (p.y < 0 || p.y > this.canvas.height) p.vy *= -1;
+
+                    this.ctx.globalAlpha = 0.5;
+                    this.ctx.beginPath();
+                    this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    this.ctx.fill();
+
+                    // Connections
+                    for (let j = i + 1; j < this.particles.length; j++) {
+                        const p2 = this.particles[j];
+                        const dx = p.x - p2.x;
+                        const dy = p.y - p2.y;
+                        const dist = Math.sqrt(dx*dx + dy*dy);
+                        if (dist < 100) {
+                            this.ctx.globalAlpha = 0.1 * (1 - dist / 100);
+                            this.ctx.beginPath();
+                            this.ctx.moveTo(p.x, p.y);
+                            this.ctx.lineTo(p2.x, p2.y);
+                            this.ctx.stroke();
+                        }
+                    }
+                });
+                requestAnimationFrame(() => this.animate());
+            }
+        }
+
+        /**
+         * Web Audio API Soundscape
+         */
+        class Soundscape {
+            constructor() {
+                this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                this.oscillators = [];
+                this.isPlaying = false;
+            }
+
+            play(mood) {
+                if (this.ctx.state === 'suspended') this.ctx.resume();
+                this.stop();
+                this.isPlaying = true;
+
+                const freqs = {
+                    happy: [523.25, 659.25, 783.99], // C Major
+                    chill: [293.66, 349.23, 440.00], // D Minor 7ish
+                    energetic: [110.00, 110.00, 220.00], // Low A drone
+                    melancholy: [220.00, 261.63, 329.63], // A Minor
+                    creative: [196.00, 246.94, 293.66]  // G Major
+                };
+
+                const moodFreqs = freqs[mood] || freqs.chill;
+                
+                moodFreqs.forEach((freq, i) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.value = freq;
+                    gain.gain.value = 0.05 / (i + 1);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    this.oscillators.push({ osc, gain });
+                });
+            }
+
+            stop() {
+                this.oscillators.forEach(({ osc, gain }) => {
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.5);
+                    osc.stop(this.ctx.currentTime + 0.5);
+                });
+                this.oscillators = [];
+            }
+        }
+
+        /**
+         * Main Application Logic
+         */
+        const app = {
+            particles: new ParticleSystem(),
+            audio: new Soundscape(),
+            currentMood: null,
+            currentVibe: null,
+
+            data: {
+                happy: {
+                    activities: ["Take a spontaneous walk", "Call someone you miss", "Cook a new recipe", "Dance to 3 songs"],
+                    music: ["Upbeat Indie Pop", "70s Funk Disco", "Sunny Acoustic"],
+                    colors: ["#facc15", "#f87171", "#4ade80", "#fbbf24"],
+                    visual: "https://cataas.com/cat?type=square"
+                },
+                chill: {
+                    activities: ["Read 10 pages", "Make a perfect cup of tea", "5-minute meditation", "Listen to vinyl"],
+                    music: ["Lo-fi Hip Hop Beats", "Ambient Nature Sounds", "Slow Jazz"],
+                    colors: ["#4ade80", "#d9f99d", "#fed7aa", "#fecaca"],
+                    visual: "https://place.dog/400/400"
+                },
+                energetic: {
+                    activities: ["20-minute HIIT workout", "Clean your entire desk", "Sprint for 100m", "Learn a new skill"],
+                    music: ["High-BPM Drum & Bass", "Classic Rock Anthems", "Workout Trap"],
+                    colors: ["#ef4444", "#fdba74", "#facc15", "#f87171"],
+                    visual: "https://cataas.com/cat?type=square"
+                },
+                melancholy: {
+                    activities: ["Write in a journal", "Watch the rain from a window", "Listen to a sad album", "Take a long shower"],
+                    music: ["Piano Solos", "Indie Folk Melancholy", "Rain & Thunder"],
+                    colors: ["#3b82f6", "#60a5fa", "#818cf8", "#93c5fd"],
+                    visual: "https://place.dog/400/400"
+                },
+                creative: {
+                    activities: ["Sketch for 15 minutes", "Write a haiku", "Take 5 abstract photos", "Build a fort"],
+                    music: ["Experimental Electronic", "Baroque Classical", "World Fusion"],
+                    colors: ["#a855f7", "#c084fc", "#e879f9", "#d8b4fe"],
+                    visual: "https://cataas.com/cat?type=square"
+                }
             },
-            chill: {
-                activities: ['Read a book', 'Meditate', 'Make tea', 'Listen to lo-fi'],
-                music: ['Lo-fi Hip Hop', 'Ambient', 'Jazz Café', 'Acoustic'],
-                colors: ['#A7F3D0', '#D9F99D', '#FED7AA', '#FECACA', '#C7D2FE'],
-                images: ['https://cataas.com/cat?type=square', 'https://place.dog/400/300']
+
+            init() {
+                document.querySelectorAll('.mood-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => this.setMood(e.target.dataset.mood));
+                });
+                
+                // Check URL params for shared vibe
+                const params = new URLSearchParams(window.location.search);
+                if (params.has('mood')) this.setMood(params.get('mood'), false);
             },
-            energetic: {
-                activities: ['Go for a run', 'Workout video', 'Dance', 'Start a project'],
-                music: ['EDM', 'Rock Anthems', 'Hip-Hop', 'Workout Mix'],
-                colors: ['#EF4444', '#FDBA74', '#FACC15', '#4ADE80', '#3B82F6'],
-                images: ['https://cataas.com/cat?type=square', 'https://place.dog/400/300']
+
+            setMood(mood, generate = true) {
+                this.currentMood = mood;
+                document.querySelectorAll('.mood-btn').forEach(b => {
+                    b.classList.toggle('active', b.dataset.mood === mood);
+                });
+                
+                this.particles.setMood(mood);
+                if (generate) {
+                    this.audio.play(mood);
+                    this.regenerate();
+                }
             },
-            melancholy: {
-                activities: ['Journaling', 'Watch the rain', 'Sad songs', 'Hot shower'],
-                music: ['Indie Folk', 'Piano', 'Rain Sounds', 'Ambient'],
-                colors: ['#818CF8', '#A78BFA', '#60A5FA', '#2DD4BF', '#C4B5FD'],
-                images: ['https://cataas.com/cat?type=square', 'https://place.dog/400/300']
+
+            async regenerate() {
+                const stage = document.getElementById('vibeStage');
+                const moodData = this.data[this.currentMood || 'chill'];
+                
+                // Select random items
+                const activity = moodData.activities[Math.floor(Math.random() * moodData.activities.length)];
+                const music = moodData.music[Math.floor(Math.random() * moodData.music.length)];
+
+                this.currentVibe = { mood: this.currentMood, activity, music };
+
+                // Render with staggered animation
+                stage.innerHTML = `
+                    <div class="vibe-card show" style="transition-delay: 0ms">
+                        <div class="section-label">Curated Activity</div>
+                        <div class="section-content">${activity}</div>
+                    </div>
+                    <div class="vibe-card show" style="transition-delay: 100ms">
+                        <div class="section-label">Sonic Landscape</div>
+                        <div class="section-content">${music}</div>
+                    </div>
+                    <div class="vibe-card show" style="transition-delay: 200ms">
+                        <div class="section-label">Visual Texture</div>
+                        <img src="${moodData.visual}" class="section-content" style="width:100%; border:1px solid var(--border)" />
+                    </div>
+                    <div class="vibe-card show" style="transition-delay: 300ms">
+                        <div class="section-label">Chromatic Palette</div>
+                        <div class="color-row">
+                            ${moodData.colors.map(c => `<div class="swatch" style="background:${c}"></div>`).join('')}
+                        </div>
+                    </div>
+                `;
             },
-            creative: {
-                activities: ['Draw', 'Write a poem', 'Photography', 'Build something'],
-                music: ['Experimental', 'Classical', 'World Music', 'Jazz Fusion'],
-                colors: ['#F87171', '#34D399', '#22D3EE', '#FDBA74', '#6EE7B7'],
-                images: ['https://cataas.com/cat?type=square', 'https://place.dog/400/300']
+
+            share() {
+                if (!this.currentVibe) return;
+                const url = `${window.location.origin}${window.location.pathname}?mood=${this.currentVibe.mood}`;
+                navigator.clipboard.writeText(url);
+                alert("Vibe URL copied to clipboard");
             }
         };
 
-        async function fetchBoredActivity() {
-            try {
-                const res = await fetch('https://www.boredapi.com/api/activity');
-                const data = await res.json();
-                return data.activity || 'Something spontaneous';
-            } catch (e) {
-                return 'Take a moment for yourself';
-            }
-        }
-
-        async function generateVibe() {
-            const card = document.getElementById('vibeCard');
-            const loading = document.getElementById('loading');
-            const errorDiv = document.getElementById('error');
-            
-            errorDiv.style.display = 'none';
-            card.classList.add('visible');
-            loading.style.display = 'block';
-            
-            ['activitySection', 'musicSection', 'quoteSection', 'imageSection', 'colorSection'].forEach(id => {
-                document.getElementById(id).style.display = 'none';
-            });
-
-            try {
-                const mood = currentMood || Object.keys(moodData)[Math.floor(Math.random() * 5)];
-                const theme = moodData[mood];
-
-                const activity = await fetchBoredActivity();
-                document.getElementById('activityText').textContent = activity;
-                document.getElementById('activitySection').style.display = 'block';
-
-                const musicGenre = theme.music[Math.floor(Math.random() * theme.music.length)];
-                document.getElementById('musicText').textContent = musicGenre;
-                document.getElementById('musicSection').style.display = 'block';
-
-                const quotes = [
-                    '"Be yourself; everyone else is already taken." — Oscar Wilde',
-                    '"The only way to do great work is to love what you do." — Steve Jobs',
-                    '"Life is what happens when you\'re busy making other plans." — John Lennon',
-                    '"The future belongs to those who believe in the beauty of their dreams." — Eleanor Roosevelt'
-                ];
-                document.getElementById('quoteText').textContent = quotes[Math.floor(Math.random() * quotes.length)];
-                document.getElementById('quoteSection').style.display = 'block';
-
-                const imageUrl = theme.images[Math.floor(Math.random() * theme.images.length)];
-                document.getElementById('vibeImage').src = imageUrl;
-                document.getElementById('imageSection').style.display = 'block';
-
-                const colors = theme.colors;
-                const paletteDiv = document.getElementById('colorPalette');
-                paletteDiv.innerHTML = '';
-                colors.forEach(color => {
-                    const swatch = document.createElement('div');
-                    swatch.className = 'color-swatch';
-                    swatch.style.backgroundColor = color;
-                    paletteDiv.appendChild(swatch);
-                });
-                document.getElementById('colorSection').style.display = 'block';
-
-                currentVibe = {
-                    mood: mood,
-                    activity: activity,
-                    music: musicGenre,
-                    colors: colors
-                };
-
-                // Update page title color subtly
-                document.querySelector('.header h1').style.color = colors[0];
-
-                loading.style.display = 'none';
-
-            } catch (err) {
-                console.error('Error:', err);
-                errorDiv.textContent = 'Failed to load vibe. Try again.';
-                errorDiv.style.display = 'block';
-                loading.style.display = 'none';
-            }
-        }
-
-        function shareVibe() {
-            if (!currentVibe) {
-                alert('Generate a vibe first');
-                return;
-            }
-
-            const shareUrl = `${window.location.origin}${window.location.pathname}?mood=${currentVibe.mood}&activity=${encodeURIComponent(currentVibe.activity)}&music=${encodeURIComponent(currentVibe.music)}`;
-            
-            navigator.clipboard.writeText(shareUrl).then(() => {
-                alert('Link copied');
-            }).catch(() => {
-                prompt('Copy this link:', shareUrl);
-            });
-        }
-
-        document.querySelectorAll('.mood-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                currentMood = this.dataset.mood;
-                generateVibe();
-            });
-        });
-
-        function loadSharedVibe() {
-            const params = new URLSearchParams(window.location.search);
-            const mood = params.get('mood');
-            const activity = params.get('activity');
-            const music = params.get('music');
-
-            if (mood && activity && music) {
-                currentVibe = { mood, activity, music };
-                currentMood = mood;
-                
-                document.querySelectorAll('.mood-btn').forEach(btn => {
-                    if (btn.dataset.mood === mood) btn.classList.add('active');
-                });
-
-                document.getElementById('vibeCard').classList.add('visible');
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('activityText').textContent = activity;
-                document.getElementById('activitySection').style.display = 'block';
-                document.getElementById('musicText').textContent = music;
-                document.getElementById('musicSection').style.display = 'block';
-                
-                const theme = moodData[mood];
-                if (theme) {
-                    document.querySelector('.header h1').style.color = theme.colors[0];
-                }
-            } else {
-                generateVibe();
-            }
-        }
-
-        window.addEventListener('DOMContentLoaded', loadSharedVibe);
+        window.app = app;
+        document.addEventListener('DOMContentLoaded', () => app.init());
     </script>
 </body>
 </html>
