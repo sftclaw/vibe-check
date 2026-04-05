@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vibe Check ✨</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            transition: background 0.5s ease;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            max-width: 900px;
+            width: 100%;
+            padding: 40px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 36px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        .mood-selector {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        .mood-btn {
+            background: #f0f0f0;
+            border: 2px solid transparent;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .mood-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .mood-btn.active {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+        .vibe-card {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        .vibe-card.visible {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .vibe-section {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #fafafa;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+        }
+        .vibe-section h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        .vibe-section p {
+            color: #555;
+            line-height: 1.6;
+        }
+        .vibe-image {
+            width: 100%;
+            max-height: 300px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+        .color-palette {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .color-swatch {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        button.secondary {
+            background: #48bb78;
+        }
+        button.secondary:hover {
+            background: #38a169;
+        }
+        .loading {
+            text-align: center;
+            color: #666;
+            padding: 40px;
+        }
+        .error {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✨ Vibe Check</h1>
+        <p class="subtitle">Tell us your mood, we'll curate your vibe</p>
+        
+        <div class="error" id="error"></div>
+        
+        <div class="mood-selector" id="moodSelector">
+            <button class="mood-btn" data-mood="happy">😊 Happy</button>
+            <button class="mood-btn" data-mood="chill">😌 Chill</button>
+            <button class="mood-btn" data-mood="energetic">⚡ Energetic</button>
+            <button class="mood-btn" data-mood="melancholy">🌧️ Melancholy</button>
+            <button class="mood-btn" data-mood="creative">🎨 Creative</button>
+        </div>
+        
+        <div class="vibe-card" id="vibeCard">
+            <div class="loading" id="loading">Curating your vibe...</div>
+            
+            <div class="vibe-section" id="activitySection" style="display:none;">
+                <h3>🎯 Activity</h3>
+                <p id="activityText"></p>
+            </div>
+            
+            <div class="vibe-section" id="musicSection" style="display:none;">
+                <h3>🎵 Music Vibe</h3>
+                <p id="musicText"></p>
+            </div>
+            
+            <div class="vibe-section" id="quoteSection" style="display:none;">
+                <h3>💭 Quote</h3>
+                <p id="quoteText"></p>
+            </div>
+            
+            <div class="vibe-section" id="imageSection" style="display:none;">
+                <h3>🖼️ Mood Image</h3>
+                <img class="vibe-image" id="vibeImage" alt="Mood image" />
+            </div>
+            
+            <div class="vibe-section" id="colorSection" style="display:none;">
+                <h3>🎨 Color Palette</h3>
+                <div class="color-palette" id="colorPalette"></div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button onclick="generateVibe()">🎲 New Vibe</button>
+            <button class="secondary" onclick="shareVibe()">🔗 Share</button>
+        </div>
+    </div>
+
+    <script>
+        let currentVibe = null;
+        let currentMood = null;
+
+        const moodThemes = {
+            happy: {
+                activities: ['Go for a walk in nature', 'Call a friend you miss', 'Try a new recipe', 'Watch a comedy show'],
+                music: ['Upbeat pop', 'Feel-good indie', 'Dance hits', 'Sunny acoustic'],
+                colors: ['#FFD700', '#FF6B6B', '#4ECDC4', '#FFE66D', '#FF6B9D'],
+                images: ['https://cataas.com/cat?type=square', 'https://place.dog/400/300']
+            },
+            chill: {
+                activities: ['Read a book', 'Practice meditation', 'Make some tea', 'Listen to lo-fi beats'],
+                music: ['Lo-fi hip hop', 'Ambient electronica', 'Jazz café', 'Acoustic folk'],
+                colors: ['#A8E6CF', '#DCEDC1', '#FFD3B6', '#FFAAA5', '#C7CEEA'],
+                images: ['https://cataas.com/cat?type=square', 'https://place.dog/400/300']
+            },
+            energetic: {
+                activities: ['Go for a run', 'Try a workout video', 'Dance to your favorite songs', 'Start a new project'],
+                music: ['High-energy EDM', 'Rock anthems', 'Hip-hop bangers', 'Workout playlist'],
+                colors: ['#FF0844', '#FFB199', '#FFD200', '#00F260', '#0575E6'],
+                images: ['https://cataas.com/cat?type=square', 'https://place.dog/400/300']
+            },
+            melancholy: {
+                activities: ['Write in a journal', 'Watch the rain', 'Listen to sad songs', 'Take a hot shower'],
+                music: ['Indie folk', 'Sad piano', 'Rain sounds', 'Ambient melancholy'],
+                colors: ['#667eea', '#764ba2', '#5B86E5', '#36D1DC', '#A8C0FF'],
+                images: ['https://cataas.com/cat?type=square', 'https://place.dog/400/300']
+            },
+            creative: {
+                activities: ['Start drawing', 'Write a poem', 'Try photography', 'Build something'],
+                music: ['Experimental electronic', 'Classical', 'World music', 'Jazz fusion'],
+                colors: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8'],
+                images: ['https://cataas.com/cat?type=square', 'https://place.dog/400/300']
+            }
+        };
+
+        async function fetchBoredActivity() {
+            try {
+                const res = await fetch('https://www.boredapi.com/api/activity');
+                const data = await res.json();
+                return data.activity || 'Something spontaneous!';
+            } catch (e) {
+                return 'Take a moment for yourself';
+            }
+        }
+
+        async function generateColorPalette() {
+            // Generate a complementary palette based on mood colors
+            if (currentMood && moodThemes[currentMood]) {
+                return moodThemes[currentMood].colors;
+            }
+            // Fallback random palette
+            const colors = [];
+            for (let i = 0; i < 5; i++) {
+                colors.push('#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0'));
+            }
+            return colors;
+        }
+
+        async function generateVibe() {
+            const card = document.getElementById('vibeCard');
+            const loading = document.getElementById('loading');
+            const errorDiv = document.getElementById('error');
+            
+            errorDiv.style.display = 'none';
+            card.classList.add('visible');
+            loading.style.display = 'block';
+            
+            // Hide all sections initially
+            document.getElementById('activitySection').style.display = 'none';
+            document.getElementById('musicSection').style.display = 'none';
+            document.getElementById('quoteSection').style.display = 'none';
+            document.getElementById('imageSection').style.display = 'none';
+            document.getElementById('colorSection').style.display = 'none';
+
+            try {
+                // Use selected mood or random
+                const mood = currentMood || Object.keys(moodThemes)[Math.floor(Math.random() * 5)];
+                const theme = moodThemes[mood];
+
+                // Fetch activity
+                const activity = await fetchBoredActivity();
+                document.getElementById('activityText').textContent = activity;
+                document.getElementById('activitySection').style.display = 'block';
+
+                // Music suggestion
+                const musicGenre = theme.music[Math.floor(Math.random() * theme.music.length)];
+                document.getElementById('musicText').textContent = `Try listening to: ${musicGenre}`;
+                document.getElementById('musicSection').style.display = 'block';
+
+                // Quote (using a simple quote)
+                const quotes = [
+                    '"Be yourself; everyone else is already taken." - Oscar Wilde',
+                    '"The only way to do great work is to love what you do." - Steve Jobs',
+                    '"Life is what happens when you\'re busy making other plans." - John Lennon',
+                    '"The future belongs to those who believe in the beauty of their dreams." - Eleanor Roosevelt'
+                ];
+                document.getElementById('quoteText').textContent = quotes[Math.floor(Math.random() * quotes.length)];
+                document.getElementById('quoteSection').style.display = 'block';
+
+                // Image
+                const imageUrl = theme.images[Math.floor(Math.random() * theme.images.length)];
+                document.getElementById('vibeImage').src = imageUrl;
+                document.getElementById('imageSection').style.display = 'block';
+
+                // Color palette
+                const colors = await generateColorPalette();
+                const paletteDiv = document.getElementById('colorPalette');
+                paletteDiv.innerHTML = '';
+                colors.forEach(color => {
+                    const swatch = document.createElement('div');
+                    swatch.className = 'color-swatch';
+                    swatch.style.backgroundColor = color;
+                    swatch.title = color;
+                    paletteDiv.appendChild(swatch);
+                });
+                document.getElementById('colorSection').style.display = 'block';
+
+                currentVibe = {
+                    mood: mood,
+                    activity: activity,
+                    music: musicGenre,
+                    colors: colors
+                };
+
+                // Update background
+                const bgGradient = `linear-gradient(135deg, ${colors[0]} 0%, ${colors[1]} 100%)`;
+                document.body.style.background = bgGradient;
+
+                loading.style.display = 'none';
+
+            } catch (err) {
+                console.error('Error:', err);
+                errorDiv.textContent = 'Error: ' + err.message;
+                errorDiv.style.display = 'block';
+                loading.style.display = 'none';
+            }
+        }
+
+        function shareVibe() {
+            if (!currentVibe) {
+                alert('Generate a vibe first!');
+                return;
+            }
+
+            const shareUrl = `${window.location.origin}${window.location.pathname}?mood=${currentVibe.mood}&activity=${encodeURIComponent(currentVibe.activity)}&music=${encodeURIComponent(currentVibe.music)}`;
+            
+            navigator.clipboard.writeText(shareUrl).then(() => {
+                alert('Vibe link copied to clipboard!');
+            }).catch(() => {
+                prompt('Copy this link:', shareUrl);
+            });
+        }
+
+        // Mood selector click handler
+        document.querySelectorAll('.mood-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentMood = this.dataset.mood;
+                generateVibe();
+            });
+        });
+
+        // Load shared vibe from URL params
+        function loadSharedVibe() {
+            const params = new URLSearchParams(window.location.search);
+            const mood = params.get('mood');
+            const activity = params.get('activity');
+            const music = params.get('music');
+
+            if (mood && activity && music) {
+                currentVibe = { mood, activity, music };
+                currentMood = mood;
+                
+                // Set active mood button
+                document.querySelectorAll('.mood-btn').forEach(btn => {
+                    if (btn.dataset.mood === mood) {
+                        btn.classList.add('active');
+                    }
+                });
+
+                // Display the shared vibe
+                document.getElementById('vibeCard').classList.add('visible');
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('activityText').textContent = activity;
+                document.getElementById('activitySection').style.display = 'block';
+                document.getElementById('musicText').textContent = `Try listening to: ${music}`;
+                document.getElementById('musicSection').style.display = 'block';
+                
+                // Generate other elements
+                generateColorPalette().then(colors => {
+                    const bgGradient = `linear-gradient(135deg, ${colors[0]} 0%, ${colors[1]} 100%)`;
+                    document.body.style.background = bgGradient;
+                });
+            } else {
+                // Auto-generate on load
+                generateVibe();
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', loadSharedVibe);
+    </script>
+</body>
+</html>
