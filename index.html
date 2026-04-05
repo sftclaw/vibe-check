@@ -95,10 +95,24 @@
         const app = {
             particles: new Particles(), currentMood: 'chill', currentVibe: null,
             init() { document.querySelectorAll('.mood-btn').forEach(b => b.addEventListener('click', e => this.setMood(e.target.dataset.mood))); History.render(); this.setMood('chill'); },
-            setMood(m) { this.currentMood = m; document.querySelectorAll('.mood-btn').forEach(b => b.classList.toggle('active', b.dataset.mood === m)); this.particles.setMood(m); this.regenerate(); History.log(m); },
+            setMood(m) { 
+                this.currentMood = m; 
+                document.querySelectorAll('.mood-btn').forEach(b => b.classList.toggle('active', b.dataset.mood === m)); 
+                this.particles.setMood(m); 
+                this.regenerate(); 
+                History.log(m); 
+            },
             regenerate() {
                 const d = moodData[this.currentMood];
-                this.currentVibe = { mood: m, activity: d.activities[Math.floor(Math.random()*d.activities.length)], music: d.music[Math.floor(Math.random()*d.music.length)], colors: d.colors, quote: d.quote, dive: d.dive, id: Math.random().toString(36).substring(2,6).toUpperCase() };
+                this.currentVibe = { 
+                    mood: this.currentMood, 
+                    activity: d.activities[Math.floor(Math.random()*d.activities.length)], 
+                    music: d.music[Math.floor(Math.random()*d.music.length)], 
+                    colors: d.colors, 
+                    quote: d.quote, 
+                    dive: d.dive, 
+                    id: Math.random().toString(36).substring(2,6).toUpperCase() 
+                };
                 document.getElementById('vibeStage').innerHTML = `
                     <div class="vibe-ticket visible">
                         <div class="ticket-header"><div class="ticket-mood">${this.currentVibe.mood}</div><div style="font-family:monospace; font-size:0.7rem; color:var(--muted)">ID: ${this.currentVibe.id}</div></div>
@@ -114,27 +128,19 @@
             exportCard() {
                 const c = document.getElementById('export-canvas'), ctx = c.getContext('2d');
                 const v = this.currentVibe;
-                // Background
                 ctx.fillStyle = '#020202'; ctx.fillRect(0,0,1080,1350);
-                // Border
                 ctx.strokeStyle = '#27272a'; ctx.lineWidth = 20; ctx.strokeRect(40,40,1000,1270);
-                // Header
                 ctx.fillStyle = '#ffffff'; ctx.font = 'bold 80px Inter'; ctx.fillText('VIBE CHECK', 100, 180);
                 ctx.font = 'italic 140px Playfair Display'; ctx.fillText(v.mood, 100, 350);
-                // Content
                 ctx.font = 'bold 30px Inter'; ctx.fillStyle = '#71717a'; ctx.fillText('ACTIVITY', 100, 450);
                 ctx.fillStyle = '#ffffff'; ctx.font = '50px Inter'; ctx.fillText(v.activity, 100, 520);
                 ctx.fillStyle = '#71717a'; ctx.font = 'bold 30px Inter'; ctx.fillText('SOUNDSCAPE', 100, 620);
                 ctx.fillStyle = '#ffffff'; ctx.font = 'italic 50px Playfair Display'; ctx.fillText(v.music, 100, 690);
-                // Deep Dive & Quote
                 ctx.fillStyle = '#71717a'; ctx.font = 'bold 30px Inter'; ctx.fillText('REFLECTION', 100, 780);
                 ctx.fillStyle = '#a1a1aa'; ctx.font = 'italic 35px Playfair Display'; 
                 this.wrapText(ctx, `"${v.quote}" ${v.dive}`, 100, 850, 880, 50);
-                // Palette
                 v.colors.forEach((col, i) => { ctx.fillStyle = col; ctx.beginPath(); ctx.arc(140+(i*70), 1150, 30, 0, Math.PI*2); ctx.fill(); });
-                // ID
                 ctx.fillStyle = '#27272a'; ctx.font = '30px monospace'; ctx.fillText(`ID: ${v.id}`, 100, 1250);
-                
                 const link = document.createElement('a'); link.download = `vibe-${v.id}.png`; link.href = c.toDataURL(); link.click();
             },
             wrapText(ctx, text, x, y, maxWidth, lineHeight) {
