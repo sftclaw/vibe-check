@@ -7,29 +7,28 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#020202">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Playfair+Display:ital,wght@1,600&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg: #020202; --fg: #ffffff; --card-bg: #111111; --border: #27272a;
-            --accent: #fafafa; --muted: #71717a; --success: #22c55e;
+            --accent: #fafafa; --muted: #71717a;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
             font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--fg);
-            min-height: 100vh; overflow-x: hidden; padding-bottom: 80px;
+            min-height: 100vh; overflow-x: hidden; padding-bottom: 100px;
         }
         #canvas-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.4; }
         .app-container { max-width: 500px; margin: 0 auto; padding: 2rem 1.5rem; }
         
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem; }
         .header h1 { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.05em; }
         .streak-badge { background: var(--card-bg); border: 1px solid var(--border); padding: 0.5rem 1rem; font-size: 0.75rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem; }
-        .streak-badge.fire { color: #f97316; border-color: #f97316; animation: pulse 2s infinite; }
+        .streak-badge.fire { color: #f97316; border-color: #f97316; }
         
-        .mood-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-bottom: 2rem; }
+        .mood-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-bottom: 2.5rem; }
         .mood-btn { background: var(--card-bg); border: 1px solid var(--border); color: var(--muted); padding: 0.75rem; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.05em; }
         .mood-btn.active { background: var(--fg); color: var(--bg); border-color: var(--fg); }
 
@@ -40,27 +39,27 @@
         .ticket-body { padding: 1.5rem; }
         .ticket-label { font-size: 0.65rem; text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem; letter-spacing: 0.1em; }
         .ticket-content { font-size: 1.1rem; font-weight: 500; margin-bottom: 1.5rem; line-height: 1.4; }
-        .palette-row { display: flex; gap: 0.25rem; }
-        .mini-swatch { width: 20px; height: 20px; }
+        .palette-row { display: flex; gap: 0.25rem; margin-top: 1rem; }
+        .mini-swatch { width: 24px; height: 24px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); }
 
-        .spotify-btn {
-            display: flex; align-items: center; justify-content: center; gap: 0.5rem;
-            width: 100%; background: #1DB954; color: white; padding: 1rem;
-            font-weight: 700; border: none; cursor: pointer; margin-top: 1rem;
-            text-decoration: none; font-size: 0.9rem;
+        .deep-dive {
+            background: rgba(255,255,255,0.03); border-left: 2px solid var(--fg);
+            padding: 1rem; margin-top: 1.5rem; font-size: 0.9rem; color: var(--muted);
+            font-family: 'Playfair Display', serif; font-style: italic;
         }
 
-        .analytics-grid { display: none; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 2rem; }
-        .analytics-grid.visible { display: grid; }
-        .heatmap-day { aspect-ratio: 1; background: var(--card-bg); border-radius: 2px; }
+        .analytics-section { margin-top: 3rem; opacity: 0.7; }
+        .analytics-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem; color: var(--muted); }
+        .analytics-grid { display: grid; grid-template-columns: repeat(15, 1fr); gap: 3px; }
+        .heatmap-day { aspect-ratio: 1; background: var(--card-bg); border-radius: 2px; transition: all 0.2s; }
+        .heatmap-day:hover { transform: scale(1.2); border: 1px solid var(--fg); }
         .heatmap-day.active { background: var(--fg); }
 
-        .action-bar { position: fixed; bottom: 0; left: 0; right: 0; padding: 1rem; background: rgba(2,2,2,0.95); backdrop-filter: blur(10px); display: flex; gap: 1rem; justify-content: center; border-top: 1px solid var(--border); z-index: 100; }
-        .btn { flex: 1; padding: 1rem; border: none; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: var(--card-bg); color: var(--fg); }
+        .action-bar { position: fixed; bottom: 0; left: 0; right: 0; padding: 1.25rem; background: rgba(2,2,2,0.9); backdrop-filter: blur(16px); display: flex; gap: 1rem; justify-content: center; border-top: 1px solid var(--border); z-index: 100; }
+        .btn { flex: 1; padding: 1rem; border: none; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: var(--card-bg); color: var(--fg); font-size: 0.9rem; }
         .btn-primary { background: var(--fg); color: var(--bg); border-color: var(--fg); }
 
         @keyframes slideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
         #export-canvas { display: none; }
     </style>
 </head>
@@ -82,25 +81,55 @@
 
         <div id="vibeStage"></div>
 
-        <div class="ticket-header" style="border:none; padding: 1.5rem 0 0 0;">
-            <div class="ticket-mood" style="font-size: 1rem; font-family: 'Inter'; font-style: normal;">30-DAY HISTORY</div>
+        <div class="analytics-section">
+            <div class="analytics-label">30-Day Mood History</div>
+            <div class="analytics-grid" id="analyticsGrid"></div>
         </div>
-        <div class="analytics-grid" id="analyticsGrid"></div>
     </div>
 
     <div class="action-bar">
         <button class="btn" onclick="app.regenerate()">🎲 New Vibe</button>
-        <button class="btn btn-primary" onclick="app.exportCard()">📸 Save</button>
+        <button class="btn btn-primary" onclick="app.exportCard()">📸 Save Card</button>
     </div>
 
     <canvas id="export-canvas" width="1080" height="1350"></canvas>
     <script>
         const moodData = {
-            happy: { activities: ["Take a spontaneous walk", "Call a friend", "Cook something new"], music: ["Upbeat Indie", "70s Funk", "Sunny Acoustic"], colors: ["#facc15", "#f87171", "#4ade80", "#fff"], quote: "Happiness is a choice.", spotify: "37i9dQZF1DXdPec7aLTmlC" },
-            chill: { activities: ["Read 10 pages", "Make tea", "Meditate"], music: ["Lo-fi Beats", "Ambient", "Slow Jazz"], colors: ["#4ade80", "#d9f99d", "#fed7aa", "#fff"], quote: "Quiet the mind.", spotify: "37i9dQZF1DWZeKCadgRdKQ" },
-            energetic: { activities: ["HIIT workout", "Clean desk", "Sprint"], music: ["Drum & Bass", "Rock Anthems", "Trap"], colors: ["#ef4444", "#fdba74", "#facc15", "#fff"], quote: "Energy flows where attention goes.", spotify: "37i9dQZF1DX76Wlfdnj7AP" },
-            melancholy: { activities: ["Journal", "Watch rain", "Listen to sad songs"], music: ["Piano Solos", "Indie Folk", "Rain Sounds"], colors: ["#3b82f6", "#60a5fa", "#818cf8", "#fff"], quote: "Tears are words.", spotify: "37i9dQZF1DWXhcuQw7KIeM" },
-            creative: { activities: ["Sketch", "Write a poem", "Take photos"], music: ["Experimental", "Classical", "World Fusion"], colors: ["#a855f7", "#c084fc", "#e879f9", "#fff"], quote: "Creativity is intelligence having fun.", spotify: "37i9dQZF1DX4sWSpwAYIY1" }
+            happy: { 
+                activities: ["Take a spontaneous 15-min walk", "Call someone you miss", "Cook a new recipe", "Dance to a favorite song"], 
+                music: ["Upbeat Indie Pop", "70s Funk", "Sunny Acoustic"], 
+                colors: ["#facc15", "#f87171", "#4ade80", "#ffffff"], 
+                quote: "Happiness is not by chance, but by choice.",
+                dive: "Choosing joy is a radical act. Today, lean into the light."
+            },
+            chill: { 
+                activities: ["Read 10 pages of a book", "Brew the perfect cup of tea", "5-minute guided meditation", "Listen to a vinyl record"], 
+                music: ["Lo-fi Hip Hop", "Ambient Nature", "Slow Jazz"], 
+                colors: ["#4ade80", "#d9f99d", "#fed7aa", "#ffffff"], 
+                quote: "Quiet the mind, and the soul will speak.",
+                dive: "In a world of noise, your peace is your power."
+            },
+            energetic: { 
+                activities: ["20-minute HIIT session", "Clean your entire workspace", "Sprint for 100 meters", "Start that side project"], 
+                music: ["High-BPM Drum & Bass", "Rock Anthems", "Workout Trap"], 
+                colors: ["#ef4444", "#fdba74", "#facc15", "#ffffff"], 
+                quote: "Energy flows where attention goes.",
+                dive: "You are a kinetic force. Don't let that energy go to waste."
+            },
+            melancholy: { 
+                activities: ["Write in a private journal", "Watch the rain from a window", "Listen to a sad album", "Take a long, hot shower"], 
+                music: ["Piano Solos", "Indie Folk", "Rain Sounds"], 
+                colors: ["#3b82f6", "#60a5fa", "#818cf8", "#ffffff"], 
+                quote: "Tears are words that need to be written.",
+                dive: "Sadness is just another form of depth. Let yourself feel it."
+            },
+            creative: { 
+                activities: ["Sketch for 15 minutes", "Write a short haiku", "Take 5 abstract photos", "Build a blanket fort"], 
+                music: ["Experimental Electronic", "Baroque Classical", "World Fusion"], 
+                colors: ["#a855f7", "#c084fc", "#e879f9", "#ffffff"], 
+                quote: "Creativity is intelligence having fun.",
+                dive: "The world is waiting for what only you can create."
+            }
         };
 
         class Particles {
@@ -114,13 +143,17 @@
             }
             resize() { this.c.width = window.innerWidth; this.c.height = window.innerHeight; }
             setMood(m) {
-                const cfg = { happy: {c:80, s:1.5, col:'#facc15'}, chill: {c:40, s:0.3, col:'#4ade80'}, energetic: {c:120, s:3, col:'#ef4444'}, melancholy: {c:50, s:0.5, col:'#60a5fa'}, creative: {c:70, s:1.2, col:'#c084fc'} }[m];
+                const cfg = {
+                    happy: { c: 100, s: 1.5, col: '#facc15' }, chill: { c: 40, s: 0.3, col: '#4ade80' },
+                    energetic: { c: 150, s: 3.0, col: '#ef4444' }, melancholy: { c: 60, s: 0.5, col: '#60a5fa' },
+                    creative: { c: 80, s: 1.2, col: '#c084fc' }
+                }[m] || { c: 50, s: 0.5, col: '#fff' };
                 this.p = [];
-                for(let i=0; i<cfg.c; i++) this.p.push({x:Math.random()*this.c.width, y:Math.random()*this.c.height, vx:(Math.random()-0.5)*cfg.s, vy:(Math.random()-0.5)*cfg.s, s:Math.random()*2});
+                for(let i=0; i<cfg.c; i++) this.p.push({ x: Math.random()*this.c.width, y: Math.random()*this.c.height, vx: (Math.random()-0.5)*cfg.s, vy: (Math.random()-0.5)*cfg.s, s: Math.random()*2 });
                 this.col = cfg.col;
             }
             animate() {
-                this.ctx.clearRect(0,0,this.c.width,this.c.height);
+                this.ctx.clearRect(0,0,this.c.width, this.c.height);
                 this.ctx.fillStyle = this.col;
                 this.p.forEach(d => {
                     d.x += d.vx; d.y += d.vy;
@@ -150,7 +183,6 @@
                     if(h[i]) div.classList.add('active');
                     grid.appendChild(div);
                 }
-                grid.classList.add('visible');
             }
         };
 
@@ -172,18 +204,26 @@
             },
             regenerate() {
                 const d = moodData[this.currentMood];
-                this.currentVibe = { mood: this.currentMood, activity: d.activities[Math.floor(Math.random()*d.activities.length)], music: d.music[Math.floor(Math.random()*d.music.length)], colors: d.colors, quote: d.quote, id: Math.random().toString(36).substring(2,6).toUpperCase(), spotify: d.spotify };
+                this.currentVibe = { 
+                    mood: this.currentMood, 
+                    activity: d.activities[Math.floor(Math.random()*d.activities.length)], 
+                    music: d.music[Math.floor(Math.random()*d.music.length)], 
+                    colors: d.colors, 
+                    quote: d.quote, 
+                    dive: d.dive,
+                    id: Math.random().toString(36).substring(2,6).toUpperCase() 
+                };
                 
                 document.getElementById('vibeStage').innerHTML = `
                     <div class="vibe-ticket visible">
                         <div class="ticket-header"><div class="ticket-mood">${this.currentVibe.mood}</div><div style="font-family:monospace; font-size:0.7rem; color:var(--muted)">ID: ${this.currentVibe.id}</div></div>
                         <div class="ticket-body">
-                            <div class="ticket-label">Activity</div><div class="ticket-content">${this.currentVibe.activity}</div>
-                            <div class="ticket-label">Soundscape</div><div class="ticket-content" style="font-family:'Playfair Display',serif; font-style:italic">${this.currentVibe.music}</div>
+                            <div class="ticket-label">Curated Activity</div><div class="ticket-content">${this.currentVibe.activity}</div>
+                            <div class="ticket-label">Sonic Landscape</div><div class="ticket-content" style="font-family:'Playfair Display',serif; font-style:italic">${this.currentVibe.music}</div>
                             <div class="ticket-label">Mantra</div><div class="ticket-content" style="font-size:0.9rem; color:var(--muted)">"${this.currentVibe.quote}"</div>
-                            <a href="https://open.spotify.com/playlist/${this.currentVibe.spotify}?si=vibecheck" target="_blank" class="spotify-btn">▶ Play on Spotify</a>
+                            <div class="deep-dive">${this.currentVibe.dive}</div>
+                            <div class="palette-row">${this.currentVibe.colors.map(c=>`<div class="mini-swatch" style="background:${c}"></div>`).join('')}</div>
                         </div>
-                        <div style="padding: 0 1.5rem 1.5rem;"><div class="palette-row">${this.currentVibe.colors.map(c=>`<div class="mini-swatch" style="background:${c}"></div>`).join('')}</div></div>
                     </div>
                 `;
             },
@@ -194,6 +234,7 @@
                 ctx.font = 'italic 120px Playfair Display'; ctx.fillText(this.currentVibe.mood, 100, 300);
                 ctx.font = '40px Inter'; ctx.fillStyle = '#888';
                 ctx.fillText(this.currentVibe.activity, 100, 450);
+                ctx.fillText(this.currentVibe.dive, 100, 550);
                 this.currentVibe.colors.forEach((col, i) => { ctx.fillStyle = col; ctx.fillRect(100+(i*80), 900, 60, 60); });
                 const link = document.createElement('a'); link.download = `vibe-${this.currentVibe.id}.png`; link.href = c.toDataURL(); link.click();
             }
